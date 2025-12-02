@@ -3,10 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>거북목 자가진단 테스트 | 파우치웰</title>
+    <title>파우치웰 | 가벼운 선택, 깊은 가치</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- MediaPipe Pose Detection -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
     <style>
         :root {
             --primary-blue: #0066FF;
@@ -24,13 +28,12 @@
             --gray-600: #475569;
             --gray-800: #1E293B;
             --gradient-primary: linear-gradient(135deg, #0066FF 0%, #00D4FF 100%);
+            --gradient-dark: linear-gradient(135deg, #0A1628 0%, #1A2B4A 100%);
             --gradient-light: linear-gradient(180deg, #F8FAFC 0%, #E6F0FF 100%);
             --shadow-sm: 0 2px 8px rgba(0, 102, 255, 0.08);
             --shadow-md: 0 8px 30px rgba(0, 102, 255, 0.12);
             --shadow-lg: 0 20px 60px rgba(0, 102, 255, 0.15);
-            --green: #10B981;
-            --yellow: #F59E0B;
-            --red: #EF4444;
+            --shadow-glow: 0 0 40px rgba(0, 212, 255, 0.3);
         }
 
         * {
@@ -39,152 +42,1208 @@
             box-sizing: border-box;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
             font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--gradient-light);
+            background-color: var(--white);
             color: var(--gray-800);
             line-height: 1.7;
-            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        .container {
-            max-width: 700px;
-            margin: 0 auto;
-            padding: 40px 20px;
+        .english {
+            font-family: 'Outfit', sans-serif;
         }
 
-        /* Header */
-        .header {
+        /* Top Announcement Bar */
+        .announcement-bar {
+            background: var(--gradient-primary);
+            padding: 12px 20px;
             text-align: center;
-            margin-bottom: 40px;
+            color: var(--white);
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .announcement-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            100% { left: 100%; }
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 20px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            padding: 15px 60px;
+            box-shadow: var(--shadow-sm);
         }
 
         .logo {
             font-family: 'Outfit', sans-serif;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             font-weight: 700;
             color: var(--navy);
             text-decoration: none;
-            margin-bottom: 30px;
-            display: inline-block;
+            letter-spacing: -0.5px;
         }
 
         .logo span {
             color: var(--primary-blue);
         }
 
-        .header h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--navy);
-            margin-bottom: 10px;
-        }
-
-        .header p {
-            color: var(--gray-600);
-            font-size: 1rem;
-        }
-
-        /* Test Card */
-        .test-card {
-            background: var(--white);
-            border-radius: 24px;
-            padding: 40px;
-            box-shadow: var(--shadow-lg);
-        }
-
-        .test-intro {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 30px;
-            border-bottom: 1px solid var(--gray-100);
-        }
-
-        .test-intro .icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-        }
-
-        .test-intro h2 {
-            font-size: 1.3rem;
-            color: var(--navy);
-            margin-bottom: 10px;
-        }
-
-        .test-intro p {
-            color: var(--gray-600);
-            font-size: 14px;
-        }
-
-        /* Checklist */
-        .checklist {
+        .nav-links {
+            display: flex;
+            gap: 40px;
             list-style: none;
         }
 
-        .checklist li {
-            margin-bottom: 16px;
+        .nav-links a {
+            color: var(--gray-600);
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            position: relative;
         }
 
-        .checklist label {
-            display: flex;
-            align-items: flex-start;
-            gap: 15px;
-            padding: 18px 20px;
-            background: var(--off-white);
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-blue);
+            transition: width 0.3s ease;
         }
 
-        .checklist label:hover {
-            background: var(--primary-light);
-        }
-
-        .checklist input[type="checkbox"] {
-            width: 24px;
-            height: 24px;
-            margin-top: 2px;
-            accent-color: var(--primary-blue);
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-
-        .checklist input[type="checkbox"]:checked + .check-text {
+        .nav-links a:hover {
             color: var(--primary-blue);
         }
 
-        .checklist label:has(input:checked) {
-            background: var(--primary-light);
-            border-color: var(--primary-blue);
+        .nav-links a:hover::after {
+            width: 100%;
         }
 
-        .check-text {
-            font-size: 15px;
+        .nav-cta {
+            padding: 12px 28px;
+            background: var(--gradient-primary);
+            color: var(--white);
+            border: none;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .nav-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 140px 60px 100px;
+            background: var(--gradient-light);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 80%;
+            height: 150%;
+            background: radial-gradient(ellipse, rgba(0, 212, 255, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 60%;
+            height: 100%;
+            background: radial-gradient(ellipse, rgba(0, 102, 255, 0.06) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 20px;
+            background: var(--white);
+            border: 1px solid var(--primary-light);
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--primary-blue);
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .hero-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--primary-blue);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        .hero h1 {
+            font-size: clamp(2.8rem, 5vw, 4.2rem);
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 24px;
+            color: var(--navy);
+        }
+
+        .hero h1 .highlight {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-description {
+            font-size: 1.15rem;
+            color: var(--gray-600);
+            margin-bottom: 40px;
+            line-height: 1.8;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 50px;
+            margin-bottom: 40px;
+        }
+
+        .stat-item {
+            text-align: left;
+        }
+
+        .stat-number {
+            font-family: 'Outfit', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            line-height: 1;
+            margin-bottom: 5px;
+        }
+
+        .stat-number span {
+            font-size: 1.2rem;
+            color: var(--gray-400);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--gray-600);
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+        }
+
+        .btn-primary {
+            padding: 18px 36px;
+            background: var(--gradient-primary);
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-primary svg {
+            transition: transform 0.3s ease;
+        }
+
+        .btn-primary:hover svg {
+            transform: translateX(5px);
+        }
+
+        .btn-secondary {
+            padding: 18px 36px;
+            background: var(--white);
             color: var(--gray-800);
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+        }
+
+        .hero-visual {
+            position: relative;
+        }
+
+        .hero-image-wrapper {
+            position: relative;
+            padding: 40px;
+        }
+
+        .hero-image-card {
+            background: var(--white);
+            border-radius: 32px;
+            padding: 30px;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-image-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: var(--gradient-primary);
+        }
+
+        .product-preview {
+            text-align: center;
+        }
+
+        .product-preview-icon {
+            font-size: 8rem;
+            margin-bottom: 30px;
+            filter: drop-shadow(0 20px 40px rgba(0,102,255,0.2));
+        }
+
+        .product-preview-img {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            background: var(--white);
+            object-fit: contain;
+        }
+
+        .product-preview h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--navy);
+            margin-bottom: 10px;
+        }
+
+        .product-preview p {
+            color: var(--gray-600);
+            font-size: 15px;
+        }
+
+        .floating-card {
+            position: absolute;
+            background: var(--white);
+            border-radius: 16px;
+            padding: 20px 24px;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-card.card-1 {
+            top: 20px;
+            right: -20px;
+            animation-delay: 0s;
+        }
+
+        .floating-card.card-2 {
+            bottom: 40px;
+            left: -30px;
+            animation-delay: 2s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .floating-card-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--primary-light);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .floating-card-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--navy);
+        }
+
+        .floating-card-text span {
+            display: block;
+            font-weight: 400;
+            color: var(--gray-600);
+            font-size: 13px;
+        }
+
+        /* Section Common */
+        .section {
+            padding: 120px 60px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .section-tag {
+            display: inline-block;
+            padding: 8px 20px;
+            background: var(--primary-light);
+            color: var(--primary-blue);
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 4vw, 2.8rem);
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 20px;
+            line-height: 1.3;
+        }
+
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: var(--gray-600);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Values Section */
+        .values {
+            background: var(--white);
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .value-card {
+            padding: 50px 40px;
+            background: var(--off-white);
+            border-radius: 24px;
+            text-align: center;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .value-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .value-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-lg);
+            background: var(--white);
+        }
+
+        .value-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .value-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--gradient-primary);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            font-size: 2rem;
+            color: var(--white);
+            transition: transform 0.4s ease;
+        }
+
+        .value-card:hover .value-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .value-card h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--navy);
+        }
+
+        .value-card p {
+            font-size: 15px;
+            color: var(--gray-600);
+            line-height: 1.7;
+        }
+
+        /* Problem Section */
+        .problem {
+            background: var(--gradient-dark);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .problem::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 50%;
+            height: 100%;
+            background: radial-gradient(ellipse at top right, rgba(0, 212, 255, 0.1) 0%, transparent 60%);
+        }
+
+        .problem .section-tag {
+            background: rgba(0, 212, 255, 0.2);
+            color: var(--accent-blue);
+        }
+
+        .problem .section-title {
+            color: var(--white);
+        }
+
+        .problem .section-subtitle {
+            color: var(--gray-400);
+        }
+
+        .problem-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .problem-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 30px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .problem-item:hover {
+            background: rgba(255,255,255,0.08);
+            transform: translateX(10px);
+        }
+
+        .problem-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 107, 107, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .problem-text h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--white);
+            margin-bottom: 8px;
+        }
+
+        .problem-text p {
+            font-size: 14px;
+            color: var(--gray-400);
             line-height: 1.6;
         }
 
-        .check-number {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 24px;
-            height: 24px;
-            background: var(--gray-200);
-            color: var(--gray-600);
-            border-radius: 50%;
-            font-size: 12px;
-            font-weight: 600;
-            margin-right: 8px;
+        /* Solution Section */
+        .solution {
+            background: var(--off-white);
         }
 
-        .checklist label:has(input:checked) .check-number {
+        .solution-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .solution-text h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--navy);
+        }
+
+        .solution-text > p {
+            font-size: 1.05rem;
+            color: var(--gray-600);
+            margin-bottom: 40px;
+            line-height: 1.8;
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 18px 0;
+            border-bottom: 1px solid var(--gray-100);
+            font-size: 16px;
+            color: var(--gray-800);
+            transition: all 0.3s ease;
+        }
+
+        .feature-list li:hover {
+            padding-left: 10px;
+            color: var(--primary-blue);
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .check-icon {
+            width: 28px;
+            height: 28px;
+            background: var(--gradient-primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-weight: bold;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .solution-visual {
+            background: var(--white);
+            border-radius: 32px;
+            padding: 40px 30px;
+            box-shadow: var(--shadow-md);
+            text-align: center;
+            position: relative;
+        }
+
+        .solution-visual::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            width: 100px;
+            height: 100px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            opacity: 0.1;
+        }
+
+        .solution-visual .product-image {
+            font-size: 6rem;
+            margin-bottom: 30px;
+        }
+
+        .solution-visual .product-img {
+            width: 100%;
+            max-width: 450px;
+            height: auto;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            background: var(--white);
+            object-fit: contain;
+        }
+
+        .solution-visual h4 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--navy);
+            margin-bottom: 15px;
+        }
+
+        .solution-visual p {
+            color: var(--gray-600);
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        /* Neck Check Section */
+        .neck-check {
+            background: var(--white);
+            position: relative;
+        }
+
+        .neck-check::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--gradient-primary);
+        }
+
+        .camera-wrapper {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 50px;
+            align-items: start;
+        }
+
+        .camera-box {
+            position: relative;
+            background: var(--navy);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .camera-box video,
+        .camera-box canvas {
+            width: 100%;
+            display: block;
+        }
+
+        .camera-box canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .camera-placeholder {
+            aspect-ratio: 4/3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--gradient-dark);
+            color: var(--white);
+            text-align: center;
+            padding: 50px;
+        }
+
+        .camera-placeholder-icon {
+            width: 100px;
+            height: 100px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            margin-bottom: 25px;
+            border: 2px dashed rgba(255,255,255,0.3);
+        }
+
+        .camera-placeholder h4 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+        }
+
+        .camera-placeholder p {
+            font-size: 14px;
+            color: var(--gray-400);
+            margin-bottom: 30px;
+        }
+
+        .start-camera-btn {
+            padding: 16px 40px;
+            background: var(--gradient-primary);
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .start-camera-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .start-camera-btn:disabled {
+            background: var(--gray-400);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .status-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .status-card {
+            background: var(--off-white);
+            border-radius: 20px;
+            padding: 28px;
+            transition: all 0.3s ease;
+        }
+
+        .status-card:hover {
+            box-shadow: var(--shadow-sm);
+        }
+
+        .status-card h4 {
+            font-size: 13px;
+            color: var(--gray-600);
+            margin-bottom: 15px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .posture-status {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .status-indicator {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .status-indicator.good {
+            background: linear-gradient(135deg, #10B981 0%, #34D399 100%);
+            color: var(--white);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .status-indicator.warning {
+            background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
+            color: var(--white);
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+        }
+
+        .status-indicator.bad {
+            background: linear-gradient(135deg, #EF4444 0%, #F87171 100%);
+            color: var(--white);
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+        }
+
+        .status-indicator.inactive {
+            background: var(--gray-100);
+            color: var(--gray-400);
+        }
+
+        .status-text h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--navy);
+        }
+
+        .status-text p {
+            font-size: 14px;
+            color: var(--gray-600);
+        }
+
+        .angle-display {
+            text-align: center;
+            padding: 15px;
+        }
+
+        .angle-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+
+        .angle-label {
+            font-size: 13px;
+            color: var(--gray-600);
+            margin-top: 8px;
+        }
+
+        .tips-card {
+            background: var(--gradient-primary);
+            color: var(--white);
+            border-radius: 20px;
+            padding: 28px;
+        }
+
+        .tips-card h4 {
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 18px;
+        }
+
+        .tips-card ul {
+            list-style: none;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .tips-card li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
+            opacity: 0.95;
+        }
+
+        .tips-card li::before {
+            content: "✦";
+            flex-shrink: 0;
+            opacity: 0.7;
+        }
+
+        .camera-controls {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .camera-controls button {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stop-btn {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        .stop-btn:hover {
+            background: #FECACA;
+        }
+
+        .pip-btn {
+            background: var(--primary-light);
+            color: var(--primary-blue);
+        }
+
+        .pip-btn:hover {
             background: var(--primary-blue);
             color: var(--white);
         }
 
-        /* Submit Button */
+        /* Fixed Status Popup */
+        .fixed-status-popup {
+            position: fixed;
+            top: 100px;
+            left: 24px;
+            padding: 16px 24px;
+            border-radius: 16px;
+            color: var(--white);
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 9999;
+            display: none;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            min-width: 140px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .fixed-status-popup.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .fixed-status-popup.good {
+            background: linear-gradient(135deg, #10B981 0%, #34D399 100%);
+        }
+
+        .fixed-status-popup.bad {
+            background: linear-gradient(135deg, #EF4444 0%, #F87171 100%);
+        }
+
+        .fixed-status-popup .status-label {
+            font-size: 11px;
+            opacity: 0.9;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .fixed-status-popup .status-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        /* CTA Section */
+        .cta {
+            background: var(--gradient-light);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -20%;
+            width: 60%;
+            height: 150%;
+            background: radial-gradient(ellipse, rgba(0, 102, 255, 0.05) 0%, transparent 70%);
+        }
+
+        .cta-content {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta h2 {
+            font-size: clamp(2rem, 4vw, 2.5rem);
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 15px;
+        }
+
+        .cta .subtitle {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.2rem;
+            color: var(--primary-blue);
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+
+        .cta > p {
+            max-width: 500px;
+            margin: 0 auto 30px;
+            color: var(--gray-600);
+            font-size: 16px;
+        }
+
+        .benefit-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 28px;
+            background: var(--gradient-primary);
+            color: var(--white);
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 50px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .benefit-badge svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Form Styles */
+        .signup-form {
+            max-width: 480px;
+            margin: 0 auto;
+            background: var(--white);
+            padding: 50px;
+            border-radius: 28px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid var(--gray-100);
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: var(--off-white);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            background: var(--white);
+            box-shadow: 0 0 0 4px var(--primary-light);
+        }
+
+        .form-group input::placeholder {
+            color: var(--gray-400);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            accent-color: var(--primary-blue);
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            font-size: 14px;
+            color: var(--gray-600);
+            line-height: 1.6;
+        }
+
+        .checkbox-group a {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .checkbox-group a:hover {
+            text-decoration: underline;
+        }
+
         .submit-btn {
             width: 100%;
             padding: 18px;
@@ -196,7 +1255,6 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-top: 30px;
         }
 
         .submit-btn:hover {
@@ -204,150 +1262,110 @@
             box-shadow: var(--shadow-md);
         }
 
-        /* Result Section */
-        .result-section {
-            display: none;
-        }
-
-        .result-section.active {
-            display: block;
-        }
-
-        .result-card {
+        .form-note {
+            margin-top: 20px;
+            font-size: 13px;
+            color: var(--gray-400);
             text-align: center;
-            padding: 50px 30px;
         }
 
-        .result-icon {
-            width: 100px;
-            height: 100px;
+        /* Footer */
+        footer {
+            padding: 60px 60px 40px;
+            background: var(--navy);
+            color: var(--white);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-logo {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .footer-logo span {
+            color: var(--accent-blue);
+        }
+
+        .footer-text {
+            text-align: right;
+        }
+
+        .footer-text p {
+            font-size: 14px;
+            color: var(--gray-400);
+            margin-bottom: 5px;
+        }
+
+        /* Success Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 22, 40, 0.8);
+            backdrop-filter: blur(10px);
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--white);
+            padding: 60px 50px;
+            border-radius: 28px;
+            text-align: center;
+            max-width: 420px;
+            margin: 20px;
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--gradient-primary);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 3rem;
-            margin: 0 auto 25px;
+            margin: 0 auto 30px;
+            font-size: 2.5rem;
+            color: var(--white);
         }
 
-        .result-icon.normal {
-            background: linear-gradient(135deg, #10B981 0%, #34D399 100%);
-        }
-
-        .result-icon.warning {
-            background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
-        }
-
-        .result-icon.danger {
-            background: linear-gradient(135deg, #EF4444 0%, #F87171 100%);
-        }
-
-        .result-title {
-            font-size: 1.8rem;
-            font-weight: 700;
+        .modal h3 {
+            font-size: 1.5rem;
             margin-bottom: 15px;
-        }
-
-        .result-title.normal {
-            color: var(--green);
-        }
-
-        .result-title.warning {
-            color: var(--yellow);
-        }
-
-        .result-title.danger {
-            color: var(--red);
-        }
-
-        .result-count {
-            font-size: 1rem;
-            color: var(--gray-600);
-            margin-bottom: 25px;
-        }
-
-        .result-count strong {
-            color: var(--primary-blue);
-            font-size: 1.2rem;
-        }
-
-        .result-description {
-            background: var(--off-white);
-            padding: 25px;
-            border-radius: 16px;
-            margin-bottom: 30px;
-        }
-
-        .result-description p {
-            color: var(--gray-700);
-            font-size: 15px;
-            line-height: 1.8;
-        }
-
-        .result-tips {
-            text-align: left;
-            margin-bottom: 30px;
-        }
-
-        .result-tips h4 {
-            font-size: 1rem;
             color: var(--navy);
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
 
-        .result-tips ul {
-            list-style: none;
-        }
-
-        .result-tips li {
-            padding: 12px 0;
-            border-bottom: 1px solid var(--gray-100);
-            font-size: 14px;
+        .modal p {
             color: var(--gray-600);
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-
-        .result-tips li:last-child {
-            border-bottom: none;
-        }
-
-        .result-tips li::before {
-            content: "✓";
-            color: var(--primary-blue);
-            font-weight: bold;
-        }
-
-        /* Back Button */
-        .back-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 16px 32px;
-            background: var(--white);
-            color: var(--gray-800);
-            border: 2px solid var(--gray-200);
-            border-radius: 12px;
             font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
+            line-height: 1.7;
+            margin-bottom: 30px;
         }
 
-        .back-btn:hover {
-            border-color: var(--primary-blue);
-            color: var(--primary-blue);
-        }
-
-        .retry-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 16px 32px;
+        .modal-btn {
+            padding: 14px 40px;
             background: var(--gradient-primary);
             color: var(--white);
             border: none;
@@ -356,274 +1374,1007 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-right: 15px;
         }
 
-        .retry-btn:hover {
+        .modal-btn:hover {
             transform: translateY(-2px);
             box-shadow: var(--shadow-md);
         }
 
-        .button-group {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
+        /* Scroll Animation */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         /* Responsive */
-        @media (max-width: 600px) {
-            .container {
-                padding: 20px 15px;
+        @media (max-width: 1024px) {
+            .navbar {
+                padding: 15px 30px;
             }
 
-            .test-card {
-                padding: 25px 20px;
+            .hero {
+                padding: 120px 30px 80px;
             }
 
-            .header h1 {
-                font-size: 1.6rem;
+            .hero-content {
+                grid-template-columns: 1fr;
+                gap: 60px;
+                text-align: center;
             }
 
-            .checklist label {
-                padding: 15px;
+            .hero-stats {
+                justify-content: center;
             }
 
-            .check-text {
-                font-size: 14px;
+            .hero-buttons {
+                justify-content: center;
             }
 
-            .result-card {
-                padding: 30px 20px;
+            .hero-visual {
+                order: -1;
             }
 
-            .button-group {
+            .section {
+                padding: 80px 30px;
+            }
+
+            .values-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .problem-list {
+                grid-template-columns: 1fr;
+            }
+
+            .solution-content {
+                grid-template-columns: 1fr;
+            }
+
+            .camera-wrapper {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .hero-stats {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .hero-buttons {
                 flex-direction: column;
             }
 
-            .retry-btn, .back-btn {
-                width: 100%;
-                justify-content: center;
+            .floating-card {
+                display: none;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+
+            .footer-text {
+                text-align: center;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <a href="index.html" class="logo">Pouch<span>Well</span></a>
-            <h1>거북목 자가진단 테스트</h1>
-            <p>아래 항목 중 해당되는 증상을 체크해주세요</p>
+    <!-- Fixed Status Popup -->
+    <div class="fixed-status-popup" id="fixedStatusPopup">
+        <div class="status-label">목 자세</div>
+        <div class="status-value" id="fixedStatusValue">정상</div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <a href="#" class="logo">Pouch<span>Well</span></a>
+        <ul class="nav-links">
+            <li><a href="#values">가치</a></li>
+            <li><a href="#solution">솔루션</a></li>
+            <li><a href="#neck-check">자세 체크</a></li>
+            <li><a href="neck-test.html">자가진단</a></li>
+            <li><a href="#signup">사전접수</a></li>
+        </ul>
+        <a href="#signup" class="nav-cta">사전접수 신청</a>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <span class="hero-badge">사전접수 진행중</span>
+                <h1>
+                    가벼운 선택,<br>
+                    <span class="highlight">깊은 가치</span>
+                </h1>
+                <p class="hero-description">
+                    경추 건강, 지구 건강, 경제적 건강.<br>
+                    세 가지 가치를 하나의 선택으로 실현하는<br>
+                    친환경 2-in-1 노트북 스탠드 파우치
+                </p>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">250<span>g</span></div>
+                        <div class="stat-label">초경량 설계</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">2in1</div>
+                        <div class="stat-label">통합 솔루션</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">100<span>%</span></div>
+                        <div class="stat-label">친환경 소재</div>
+                    </div>
+                </div>
+                <div class="hero-buttons">
+                    <a href="#signup" class="btn-primary">
+                        사전접수 신청하기
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                    <a href="#neck-check" class="btn-secondary">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polygon points="10 8 16 12 10 16 10 8"/>
+                        </svg>
+                        자세 체크하기
+                    </a>
+                    <a href="neck-test.html" class="btn-secondary">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 11l3 3L22 4"/>
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                        </svg>
+                        자가진단 테스트
+                    </a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-image-wrapper">
+                    <div class="hero-image-card">
+                        <div class="product-preview">
+                            <img src="SolutionSection.png" alt="PouchWell 제품" class="product-preview-img">
+                        </div>
+                    </div>
+                    <div class="floating-card card-1">
+                        <div class="floating-card-icon">🌱</div>
+                        <div class="floating-card-text">
+                            Eco-Friendly
+                            <span>친환경 소재</span>
+                        </div>
+                    </div>
+                    <div class="floating-card card-2">
+                        <div class="floating-card-icon">🎯</div>
+                        <div class="floating-card-text">
+                            Ergonomic
+                            <span>인체공학 설계</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+    </section>
 
-        <!-- Test Card -->
-        <div class="test-card">
-            <!-- Test Form -->
-            <div class="test-form" id="testForm">
-                <div class="test-intro">
-                    <div class="icon">🦴</div>
-                    <h2>나도 거북목일까?</h2>
-                    <p>평소 본인의 상태와 일치하는 항목에 체크해주세요</p>
-                </div>
-
-                <ul class="checklist">
-                    <li>
-                        <label>
-                            <input type="checkbox" name="symptom" value="1">
-                            <span class="check-text">
-                                <span class="check-number">1</span>
-                                목이나 어깨가 자주 뻣뻣하고 뻐근하다
-                            </span>
-                        </label>
-                    </li>
-                    <li>
-                        <label>
-                            <input type="checkbox" name="symptom" value="2">
-                            <span class="check-text">
-                                <span class="check-number">2</span>
-                                두통이 자주 발생한다 (특히 뒷목에서 시작되는 두통)
-                            </span>
-                        </label>
-                    </li>
-                    <li>
-                        <label>
-                            <input type="checkbox" name="symptom" value="3">
-                            <span class="check-text">
-                                <span class="check-number">3</span>
-                                거울로 봤을 때 머리가 어깨보다 앞으로 나와 있다
-                            </span>
-                        </label>
-                    </li>
-                    <li>
-                        <label>
-                            <input type="checkbox" name="symptom" value="4">
-                            <span class="check-text">
-                                <span class="check-number">4</span>
-                                장시간 컴퓨터/스마트폰 사용 후 목 통증이 있다
-                            </span>
-                        </label>
-                    </li>
-                    <li>
-                        <label>
-                            <input type="checkbox" name="symptom" value="5">
-                            <span class="check-text">
-                                <span class="check-number">5</span>
-                                어깨가 앞으로 말려있거나 등이 굽어있다
-                            </span>
-                        </label>
-                    </li>
-                    <li>
-                        <label>
-                            <input type="checkbox" name="symptom" value="6">
-                            <span class="check-text">
-                                <span class="check-number">6</span>
-                                팔이나 손이 자주 저리거나 감각이 둔해진다
-                            </span>
-                        </label>
-                    </li>
-                    <li>
-                        <label>
-                            <input type="checkbox" name="symptom" value="7">
-                            <span class="check-text">
-                                <span class="check-number">7</span>
-                                목을 뒤로 젖히거나 돌릴 때 뻣뻣함이나 통증이 느껴진다
-                            </span>
-                        </label>
-                    </li>
-                </ul>
-
-                <button type="button" class="submit-btn" id="submitBtn">진단 결과 확인하기</button>
+    <!-- Values Section -->
+    <section class="section values fade-in" id="values">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">OUR VALUES</span>
+                <h2 class="section-title">삼중 가치의 조화</h2>
+                <p class="section-subtitle">개인의 웰빙, 환경적 책임, 경제적 합리성을 하나로</p>
             </div>
 
-            <!-- Result Section -->
-            <div class="result-section" id="resultSection">
-                <div class="result-card">
-                    <div class="result-icon" id="resultIcon">
-                        <span id="resultEmoji"></span>
-                    </div>
-                    <h2 class="result-title" id="resultTitle"></h2>
-                    <p class="result-count">체크한 항목: <strong id="checkedCount">0</strong>개 / 7개</p>
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="value-icon">🌿</div>
+                    <h3>Personal Wellness</h3>
+                    <p>250g 초경량 설계로 어디서든 올바른 자세를 유지하며, 매일 사용하는 노트북 환경에서 경추 건강을 지켜드립니다.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">🌍</div>
+                    <h3>Environmental Care</h3>
+                    <p>재생 가능한 친환경 소재를 사용하여 지구에 대한 책임을 실천합니다. 당신의 선택이 환경을 보호합니다.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">✨</div>
+                    <h3>Accessible Value</h3>
+                    <p>프리미엄 품질을 합리적 가격으로 제공합니다. 웰니스와 지속가능성은 사치가 아닌 모두의 권리입니다.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-                    <div class="result-description">
-                        <p id="resultDescription"></p>
-                    </div>
+    <!-- Problem Section -->
+    <section class="section problem fade-in">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">THE PROBLEM</span>
+                <h2 class="section-title">우리가 해결하는 문제</h2>
+                <p class="section-subtitle">더 이상 타협하지 마세요</p>
+            </div>
 
-                    <div class="result-tips">
-                        <h4>💡 권장 사항</h4>
-                        <ul id="resultTips"></ul>
+            <div class="problem-list">
+                <div class="problem-item">
+                    <div class="problem-icon">⚖️</div>
+                    <div class="problem-text">
+                        <h4>무겁고 불편한 노트북 스탠드</h4>
+                        <p>휴대가 어려워 결국 사용하지 않게 되는 건강 솔루션</p>
                     </div>
+                </div>
+                <div class="problem-item">
+                    <div class="problem-icon">🏭</div>
+                    <div class="problem-text">
+                        <h4>플라스틱 기반의 저렴한 파우치</h4>
+                        <p>환경에 대한 죄책감을 안고 사용하는 일상용품</p>
+                    </div>
+                </div>
+                <div class="problem-item">
+                    <div class="problem-icon">💰</div>
+                    <div class="problem-text">
+                        <h4>고가의 친환경 제품</h4>
+                        <p>가치는 인정하지만 접근하기 어려운 가격 장벽</p>
+                    </div>
+                </div>
+                <div class="problem-item">
+                    <div class="problem-icon">📱</div>
+                    <div class="problem-text">
+                        <h4>증가하는 20대 경추 질환</h4>
+                        <p>하루 4시간 이상 노트북 사용, 방치되는 목 건강</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-                    <div class="button-group">
-                        <button class="retry-btn" id="retryBtn">
+    <!-- Solution Section -->
+    <section class="section solution fade-in" id="solution">
+        <div class="container">
+            <div class="solution-content">
+                <div class="solution-text">
+                    <span class="section-tag">THE SOLUTION</span>
+                    <h3>파우치웰의 해답</h3>
+                    <p>
+                        친환경 소재로 정교하게 설계된 250g 초경량 2-in-1 솔루션.
+                        파우치와 노트북 스탠드를 하나로 통합하여, 공간과 자원의 효율을
+                        극대화했습니다.
+                    </p>
+
+                    <ul class="feature-list">
+                        <li><span class="check-icon">✓</span> 250g 초경량 — 언제 어디서나 휴대 가능</li>
+                        <li><span class="check-icon">✓</span> 친환경 재생 소재 — 지구를 생각하는 소재 선택</li>
+                        <li><span class="check-icon">✓</span> 2-in-1 통합 설계 — 파우치 + 스탠드 기능</li>
+                        <li><span class="check-icon">✓</span> 인체공학적 각도 — 경추 부담 최소화</li>
+                        <li><span class="check-icon">✓</span> 합리적 가격대 — 누구나 접근 가능한 웰니스</li>
+                    </ul>
+                </div>
+
+                <div class="solution-visual">
+                    <img src="SolutionSection.png" alt="PouchWell 제품" class="product-img">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Neck Check Section -->
+    <section class="section neck-check fade-in" id="neck-check">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">POSTURE CHECK</span>
+                <h2 class="section-title">실시간 목 자세 체크</h2>
+                <p class="section-subtitle">카메라로 현재 목 상태를 확인하고 거북목을 예방하세요</p>
+            </div>
+
+            <div class="camera-wrapper">
+                <div>
+                    <div class="camera-box" id="cameraBox">
+                        <div class="camera-placeholder" id="cameraPlaceholder">
+                            <div class="camera-placeholder-icon">📷</div>
+                            <h4>카메라를 시작해주세요</h4>
+                            <p>웹캠을 통해 실시간으로 목 자세를 분석합니다</p>
+                            <button class="start-camera-btn" id="startCameraBtn">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="5 3 19 12 5 21 5 3"/>
+                                </svg>
+                                카메라 시작하기
+                            </button>
+                        </div>
+                        <video id="webcam" autoplay playsinline style="display:none;"></video>
+                        <canvas id="poseCanvas" style="display:none;"></canvas>
+                    </div>
+                    <div class="camera-controls" id="cameraControls" style="display:none;">
+                        <button class="pip-btn" id="pipBtn">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M1 4v6h6"/>
-                                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+                                <rect x="2" y="3" width="20" height="14" rx="2"/>
+                                <rect x="12" y="10" width="8" height="6" rx="1"/>
                             </svg>
-                            다시 테스트하기
+                            미니 창으로 보기
                         </button>
-                        <a href="index.html" class="back-btn">
+                        <button class="stop-btn" id="stopCameraBtn">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M19 12H5M12 19l-7-7 7-7"/>
+                                <rect x="6" y="6" width="12" height="12"/>
                             </svg>
-                            메인으로 돌아가기
-                        </a>
+                            카메라 종료
+                        </button>
+                    </div>
+                </div>
+
+                <div class="status-panel">
+                    <div class="status-card">
+                        <h4>현재 자세 상태</h4>
+                        <div class="posture-status">
+                            <div class="status-indicator inactive" id="statusIndicator">
+                                <span id="statusIcon">⏸</span>
+                            </div>
+                            <div class="status-text">
+                                <h3 id="statusTitle">대기 중</h3>
+                                <p id="statusMessage">카메라를 시작하면 자세 분석이 시작됩니다</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="status-card">
+                        <h4>목 기울기 각도</h4>
+                        <div class="angle-display">
+                            <div class="angle-value" id="angleValue">--°</div>
+                            <p class="angle-label">머리 전방 기울기 (0°가 이상적)</p>
+                        </div>
+                    </div>
+
+                    <div class="tips-card">
+                        <h4>올바른 자세 TIP</h4>
+                        <ul>
+                            <li>모니터 상단을 눈높이에 맞추거나 15° 아래로</li>
+                            <li>턱-목 각도 105°~120° 유지하기</li>
+                            <li>귀가 어깨선보다 5cm 이상 앞으로 나오면 거북목!</li>
+                            <li>고개 45° 숙이면 목에 24kg 부담</li>
+                            <li>목 꺾기 대신 부드럽게 도리도리 운동</li>
+                        </ul>
                     </div>
                 </div>
             </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="section cta fade-in" id="signup">
+        <div class="container cta-content">
+            <span class="section-tag">PRE-ORDER</span>
+            <h2>사전접수 신청하기</h2>
+            <p class="subtitle english">Be the First to Experience</p>
+            <p>
+                파우치웰의 첫 번째 고객이 되어주세요.<br>
+                사전접수 고객에게는 특별한 혜택을 드립니다.
+            </p>
+
+            <span class="benefit-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+                사전접수 특별 할인 + 무료배송
+            </span>
+
+            <form class="signup-form" id="preorderForm">
+                <div class="form-group">
+                    <label for="name">이름</label>
+                    <input type="text" id="name" name="name" placeholder="홍길동" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">이메일</label>
+                    <input type="email" id="email" name="email" placeholder="example@email.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">연락처</label>
+                    <input type="tel" id="phone" name="phone" placeholder="010-1234-5678" required>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="privacy" required>
+                    <label for="privacy">
+                        <a href="#" onclick="alert('개인정보 처리방침 내용이 표시됩니다.')">개인정보 처리방침</a>에 동의하며,
+                        파우치웰의 런칭 소식 및 프로모션 정보 수신에 동의합니다.
+                    </label>
+                </div>
+
+                <button type="submit" class="submit-btn">사전접수 신청하기</button>
+
+                <p class="form-note">* 사전접수는 구매 의무가 없으며, 언제든 취소 가능합니다.</p>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">Pouch<span>Well</span></div>
+            <div class="footer-text">
+                <p>파우치웰 | 가벼운 선택, 깊은 가치</p>
+                <p>© 2024 PouchWell. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Success Modal -->
+    <div class="modal-overlay" id="successModal">
+        <div class="modal">
+            <div class="modal-icon">✓</div>
+            <h3>사전접수가 완료되었습니다!</h3>
+            <p>
+                파우치웰의 첫 번째 고객이 되어주셔서 감사합니다.<br>
+                런칭 소식을 가장 먼저 전해드릴게요.
+            </p>
+            <button class="modal-btn" onclick="closeModal()">확인</button>
         </div>
     </div>
 
     <script>
-        const submitBtn = document.getElementById('submitBtn');
-        const retryBtn = document.getElementById('retryBtn');
-        const testForm = document.getElementById('testForm');
-        const resultSection = document.getElementById('resultSection');
-        const resultIcon = document.getElementById('resultIcon');
-        const resultEmoji = document.getElementById('resultEmoji');
-        const resultTitle = document.getElementById('resultTitle');
-        const checkedCount = document.getElementById('checkedCount');
-        const resultDescription = document.getElementById('resultDescription');
-        const resultTips = document.getElementById('resultTips');
-
-        submitBtn.addEventListener('click', function() {
-            const checkboxes = document.querySelectorAll('input[name="symptom"]:checked');
-            const count = checkboxes.length;
-
-            checkedCount.textContent = count;
-
-            // Reset classes
-            resultIcon.className = 'result-icon';
-            resultTitle.className = 'result-title';
-
-            let title, emoji, description, tips;
-
-            if (count < 3) {
-                // 정상
-                resultIcon.classList.add('normal');
-                resultTitle.classList.add('normal');
-                emoji = '😊';
-                title = '정상';
-                description = '현재 거북목 증상이 거의 없는 상태입니다. 하지만 장시간 컴퓨터나 스마트폰 사용 시 올바른 자세를 유지하는 것이 중요합니다. 예방이 최선의 치료입니다!';
-                tips = [
-                    '30분마다 스트레칭으로 목과 어깨를 풀어주세요',
-                    '모니터 높이를 눈높이에 맞춰 설정하세요',
-                    '스마트폰 사용 시 눈높이까지 들어 올려 사용하세요',
-                    '꾸준한 운동으로 목과 어깨 근육을 강화하세요'
-                ];
-            } else if (count < 5) {
-                // 거북목 위험
-                resultIcon.classList.add('warning');
-                resultTitle.classList.add('warning');
-                emoji = '⚠️';
-                title = '거북목 위험';
-                description = '거북목 증상이 나타나기 시작한 단계입니다. 지금부터 자세 교정과 스트레칭을 시작하면 충분히 개선할 수 있습니다. 방치하면 증상이 악화될 수 있으니 주의가 필요합니다.';
-                tips = [
-                    '의식적으로 턱을 당기는 습관을 들이세요',
-                    '노트북 사용 시 스탠드를 활용해 화면을 높이세요',
-                    '목 스트레칭을 하루 3회 이상 실시하세요',
-                    '베개 높이를 조절하여 수면 자세를 개선하세요',
-                    '파우치웰 노트북 스탠드로 올바른 자세를 유지하세요'
-                ];
+        // Navbar scroll effect
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
             } else {
-                // 거북목 매우 위험
-                resultIcon.classList.add('danger');
-                resultTitle.classList.add('danger');
-                emoji = '🚨';
-                title = '거북목 매우 위험';
-                description = '거북목 증상이 상당히 진행된 상태입니다. 만성 목 통증, 두통, 어깨 결림 등이 지속될 수 있으며, 방치 시 디스크 질환으로 이어질 수 있습니다. 전문의 상담을 권장드립니다.';
-                tips = [
-                    '가능한 빨리 정형외과나 재활의학과를 방문하세요',
-                    '장시간 같은 자세 유지를 피하고 자주 움직이세요',
-                    '컴퓨터 작업 환경을 인체공학적으로 개선하세요',
-                    '매일 목과 어깨 스트레칭을 15분 이상 실시하세요',
-                    '수영, 요가 등 전신 운동을 시작해보세요',
-                    '파우치웰 스탠드로 작업 환경을 개선하세요'
-                ];
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Scroll Animation
+        const fadeElements = document.querySelectorAll('.fade-in');
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        fadeElements.forEach(el => observer.observe(el));
+
+        // Form Submission
+        document.getElementById('preorderForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value
+            };
+
+            console.log('사전접수 데이터:', formData);
+
+            document.getElementById('successModal').classList.add('active');
+            this.reset();
+        });
+
+        // Modal Close
+        function closeModal() {
+            document.getElementById('successModal').classList.remove('active');
+        }
+
+        document.getElementById('successModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // ========================================
+        // 목 자세 체크 기능 (MediaPipe Pose)
+        // ========================================
+
+        const videoElement = document.getElementById('webcam');
+        const canvasElement = document.getElementById('poseCanvas');
+        const canvasCtx = canvasElement.getContext('2d');
+        const startCameraBtn = document.getElementById('startCameraBtn');
+        const stopCameraBtn = document.getElementById('stopCameraBtn');
+        const pipBtn = document.getElementById('pipBtn');
+        const cameraPlaceholder = document.getElementById('cameraPlaceholder');
+        const cameraControls = document.getElementById('cameraControls');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const statusIcon = document.getElementById('statusIcon');
+        const statusTitle = document.getElementById('statusTitle');
+        const statusMessage = document.getElementById('statusMessage');
+        const angleValue = document.getElementById('angleValue');
+        const fixedStatusPopup = document.getElementById('fixedStatusPopup');
+        const fixedStatusValue = document.getElementById('fixedStatusValue');
+
+        let camera = null;
+        let pose = null;
+        let isRunning = false;
+        let pipWindow = null;
+        let pipCanvas = null;
+        let pipCtx = null;
+        let pipStatusBox = null;
+
+        function updateFixedPopup(status) {
+            if (!isRunning) {
+                fixedStatusPopup.classList.remove('active', 'good', 'bad');
+                return;
             }
 
-            resultEmoji.textContent = emoji;
-            resultTitle.textContent = title;
-            resultDescription.textContent = description;
+            fixedStatusPopup.classList.add('active');
+            fixedStatusPopup.classList.remove('good', 'bad');
 
-            resultTips.innerHTML = tips.map(tip => `<li>${tip}</li>`).join('');
+            if (status === 'good') {
+                fixedStatusPopup.classList.add('good');
+                fixedStatusValue.textContent = '정상';
+            } else {
+                fixedStatusPopup.classList.add('bad');
+                fixedStatusValue.textContent = '비정상';
+            }
+        }
 
-            testForm.style.display = 'none';
-            resultSection.classList.add('active');
+        function updateStatus(status, angle) {
+            statusIndicator.className = 'status-indicator';
 
-            // Scroll to top
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
+            if (status === 'good') {
+                statusIndicator.classList.add('good');
+                statusIcon.textContent = '✓';
+                statusTitle.textContent = '좋은 자세';
+                statusMessage.textContent = '턱-목 각도가 적절합니다. 이 자세를 유지하세요!';
+                updateFixedPopup('good');
+            } else if (status === 'warning') {
+                statusIndicator.classList.add('warning');
+                statusIcon.textContent = '⚠';
+                statusTitle.textContent = '주의 필요';
+                statusMessage.textContent = '머리가 약간 앞으로 나왔습니다. 턱을 당겨주세요.';
+                updateFixedPopup('bad');
+            } else if (status === 'bad') {
+                statusIndicator.classList.add('bad');
+                statusIcon.textContent = '✕';
+                statusTitle.textContent = '거북목 자세';
+                statusMessage.textContent = '목에 약 24kg의 부담! 귀를 어깨선에 맞춰주세요.';
+                updateFixedPopup('bad');
+            } else {
+                statusIndicator.classList.add('inactive');
+                statusIcon.textContent = '⏸';
+                statusTitle.textContent = '대기 중';
+                statusMessage.textContent = '카메라를 시작하면 자세 분석이 시작됩니다';
+                updateFixedPopup(null);
+            }
 
-        retryBtn.addEventListener('click', function() {
-            // Reset checkboxes
-            document.querySelectorAll('input[name="symptom"]').forEach(cb => cb.checked = false);
+            if (angle !== null && angle !== undefined) {
+                angleValue.textContent = Math.round(angle) + '°';
+            } else {
+                angleValue.textContent = '--°';
+            }
 
-            resultSection.classList.remove('active');
-            testForm.style.display = 'block';
+            updatePipCanvas(status);
+        }
 
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
+        function calculateNeckAngle(landmarks) {
+            const leftShoulder = landmarks[11];
+            const rightShoulder = landmarks[12];
+            const leftEar = landmarks[7];
+            const rightEar = landmarks[8];
+
+            const shoulderCenter = {
+                x: (leftShoulder.x + rightShoulder.x) / 2,
+                y: (leftShoulder.y + rightShoulder.y) / 2
+            };
+
+            const earCenter = {
+                x: (leftEar.x + rightEar.x) / 2,
+                y: (leftEar.y + rightEar.y) / 2
+            };
+
+            const deltaX = earCenter.x - shoulderCenter.x;
+            const deltaY = shoulderCenter.y - earCenter.y;
+
+            const angleRad = Math.atan2(deltaX, deltaY);
+            const angleDeg = Math.abs(angleRad * (180 / Math.PI));
+
+            return angleDeg;
+        }
+
+        function onResults(results) {
+            if (!isRunning) return;
+
+            canvasCtx.save();
+            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+
+            canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+
+            if (results.poseLandmarks) {
+                const upperBodyConnections = [
+                    [11, 12],
+                    [11, 13], [13, 15],
+                    [12, 14], [14, 16],
+                    [11, 23], [12, 24],
+                    [0, 7], [0, 8],
+                ];
+
+                canvasCtx.strokeStyle = 'rgba(0, 102, 255, 0.7)';
+                canvasCtx.lineWidth = 3;
+
+                upperBodyConnections.forEach(([start, end]) => {
+                    const startPoint = results.poseLandmarks[start];
+                    const endPoint = results.poseLandmarks[end];
+
+                    if (startPoint && endPoint) {
+                        canvasCtx.beginPath();
+                        canvasCtx.moveTo(startPoint.x * canvasElement.width, startPoint.y * canvasElement.height);
+                        canvasCtx.lineTo(endPoint.x * canvasElement.width, endPoint.y * canvasElement.height);
+                        canvasCtx.stroke();
+                    }
+                });
+
+                const keyPoints = [0, 7, 8, 11, 12];
+                keyPoints.forEach(index => {
+                    const point = results.poseLandmarks[index];
+                    if (point) {
+                        canvasCtx.beginPath();
+                        canvasCtx.arc(
+                            point.x * canvasElement.width,
+                            point.y * canvasElement.height,
+                            6, 0, 2 * Math.PI
+                        );
+                        canvasCtx.fillStyle = '#0066FF';
+                        canvasCtx.fill();
+                        canvasCtx.strokeStyle = 'white';
+                        canvasCtx.lineWidth = 2;
+                        canvasCtx.stroke();
+                    }
+                });
+
+                const neckAngle = calculateNeckAngle(results.poseLandmarks);
+
+                let status;
+                let statusText;
+                if (neckAngle <= 10) {
+                    status = 'good';
+                    statusText = '좋음';
+                } else if (neckAngle <= 25) {
+                    status = 'warning';
+                    statusText = '주의';
+                } else {
+                    status = 'bad';
+                    statusText = '위험';
+                }
+
+                updateStatus(status, neckAngle);
+
+                canvasCtx.font = 'bold 18px "Noto Sans KR"';
+                canvasCtx.fillStyle = status === 'good' ? '#10B981' : status === 'warning' ? '#F59E0B' : '#EF4444';
+                canvasCtx.fillText(`전방 기울기: ${Math.round(neckAngle)}° (${statusText})`, 15, 30);
+
+            } else {
+                canvasCtx.font = '16px "Noto Sans KR"';
+                canvasCtx.fillStyle = 'white';
+                canvasCtx.fillText('얼굴과 어깨가 보이도록 위치해주세요', 15, 30);
+            }
+
+            canvasCtx.restore();
+        }
+
+        async function startCamera() {
+            startCameraBtn.disabled = true;
+            startCameraBtn.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 6v6l4 2"/>
+                </svg>
+                로딩 중...
+            `;
+
+            try {
+                pose = new Pose({
+                    locateFile: (file) => {
+                        return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
+                    }
+                });
+
+                pose.setOptions({
+                    modelComplexity: 1,
+                    smoothLandmarks: true,
+                    enableSegmentation: false,
+                    smoothSegmentation: false,
+                    minDetectionConfidence: 0.5,
+                    minTrackingConfidence: 0.5
+                });
+
+                pose.onResults(onResults);
+
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: 640, height: 480, facingMode: 'user' }
+                });
+
+                videoElement.srcObject = stream;
+                await videoElement.play();
+
+                canvasElement.width = videoElement.videoWidth;
+                canvasElement.height = videoElement.videoHeight;
+
+                cameraPlaceholder.style.display = 'none';
+                videoElement.style.display = 'block';
+                canvasElement.style.display = 'block';
+                cameraControls.style.display = 'flex';
+                isRunning = true;
+
+                processFrame();
+
+            } catch (error) {
+                console.error('카메라 시작 오류:', error);
+                alert('카메라를 시작할 수 없습니다. 카메라 권한을 확인해주세요.');
+                startCameraBtn.disabled = false;
+                startCameraBtn.innerHTML = `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="5 3 19 12 5 21 5 3"/>
+                    </svg>
+                    카메라 시작하기
+                `;
+            }
+        }
+
+        async function processFrame() {
+            if (!isRunning) return;
+
+            await pose.send({ image: videoElement });
+            requestAnimationFrame(processFrame);
+        }
+
+        function stopCamera() {
+            isRunning = false;
+
+            if (pipWindow && !pipWindow.closed) {
+                pipWindow.close();
+            }
+            pipWindow = null;
+
+            if (videoElement.srcObject) {
+                videoElement.srcObject.getTracks().forEach(track => track.stop());
+                videoElement.srcObject = null;
+            }
+
+            cameraPlaceholder.style.display = 'flex';
+            videoElement.style.display = 'none';
+            canvasElement.style.display = 'none';
+            cameraControls.style.display = 'none';
+            startCameraBtn.disabled = false;
+            startCameraBtn.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+                카메라 시작하기
+            `;
+
+            updateStatus('inactive', null);
+            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+        }
+
+        async function openPipWindow() {
+            if (!('documentPictureInPicture' in window)) {
+                openFallbackPopup();
+                return;
+            }
+
+            try {
+                pipWindow = await documentPictureInPicture.requestWindow({
+                    width: 320,
+                    height: 300
+                });
+
+                const style = pipWindow.document.createElement('style');
+                style.textContent = `
+                    * { margin: 0; padding: 0; box-sizing: border-box; }
+                    body {
+                        font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans KR', sans-serif;
+                        background: #0A1628;
+                        display: flex;
+                        flex-direction: column;
+                        height: 100vh;
+                        overflow: hidden;
+                    }
+                    .pip-container {
+                        flex: 1;
+                        display: flex;
+                        flex-direction: column;
+                    }
+                    .pip-video-container {
+                        flex: 1;
+                        position: relative;
+                        background: #000;
+                    }
+                    canvas {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                    }
+                    .pip-status {
+                        padding: 14px 15px;
+                        text-align: center;
+                        font-weight: 700;
+                        font-size: 15px;
+                        color: white;
+                        transition: background 0.3s;
+                    }
+                    .pip-status.good { background: linear-gradient(135deg, #10B981 0%, #34D399 100%); }
+                    .pip-status.bad { background: linear-gradient(135deg, #EF4444 0%, #F87171 100%); }
+                    .pip-status.waiting { background: #475569; }
+                `;
+                pipWindow.document.head.appendChild(style);
+
+                const container = pipWindow.document.createElement('div');
+                container.className = 'pip-container';
+                container.innerHTML = `
+                    <div class="pip-video-container">
+                        <canvas id="pipCanvas"></canvas>
+                    </div>
+                    <div class="pip-status waiting" id="pipStatus">분석 중...</div>
+                `;
+                pipWindow.document.body.appendChild(container);
+
+                pipCanvas = pipWindow.document.getElementById('pipCanvas');
+                pipCtx = pipCanvas.getContext('2d');
+                pipCanvas.width = canvasElement.width;
+                pipCanvas.height = canvasElement.height;
+                pipStatusBox = pipWindow.document.getElementById('pipStatus');
+
+                pipWindow.addEventListener('pagehide', () => {
+                    pipWindow = null;
+                    pipCanvas = null;
+                    pipCtx = null;
+                    pipStatusBox = null;
+                    pipBtn.innerHTML = `
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="3" width="20" height="14" rx="2"/>
+                            <rect x="12" y="10" width="8" height="6" rx="1"/>
+                        </svg>
+                        미니 창으로 보기
+                    `;
+                    pipBtn.disabled = false;
+                });
+
+                pipBtn.textContent = '미니 창 열림';
+                pipBtn.disabled = true;
+
+            } catch (error) {
+                console.error('PIP 창 열기 실패:', error);
+                openFallbackPopup();
+            }
+        }
+
+        function openFallbackPopup() {
+            pipWindow = window.open('', 'PouchWell 목 자세 체크', 'width=350,height=320,top=100,left=100');
+
+            if (!pipWindow) {
+                alert('팝업이 차단되었습니다. 팝업을 허용해주세요.');
+                return;
+            }
+
+            pipWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>목 자세 체크</title>
+                    <style>
+                        * { margin: 0; padding: 0; box-sizing: border-box; }
+                        body {
+                            font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans KR', sans-serif;
+                            background: #0A1628;
+                            display: flex;
+                            flex-direction: column;
+                            height: 100vh;
+                            overflow: hidden;
+                        }
+                        .pip-container {
+                            flex: 1;
+                            display: flex;
+                            flex-direction: column;
+                        }
+                        .pip-video-container {
+                            flex: 1;
+                            position: relative;
+                            background: #000;
+                        }
+                        canvas {
+                            width: 100%;
+                            height: 100%;
+                            object-fit: cover;
+                        }
+                        .pip-status {
+                            padding: 14px 15px;
+                            text-align: center;
+                            font-weight: 700;
+                            font-size: 15px;
+                            color: white;
+                            transition: background 0.3s;
+                        }
+                        .pip-status.good { background: linear-gradient(135deg, #10B981 0%, #34D399 100%); }
+                        .pip-status.bad { background: linear-gradient(135deg, #EF4444 0%, #F87171 100%); }
+                        .pip-status.waiting { background: #475569; }
+                    </style>
+                </head>
+                <body>
+                    <div class="pip-container">
+                        <div class="pip-video-container">
+                            <canvas id="pipCanvas"></canvas>
+                        </div>
+                        <div class="pip-status waiting" id="pipStatus">분석 중...</div>
+                    </div>
+                </body>
+                </html>
+            `);
+            pipWindow.document.close();
+
+            setTimeout(() => {
+                pipCanvas = pipWindow.document.getElementById('pipCanvas');
+                pipCtx = pipCanvas.getContext('2d');
+                pipCanvas.width = canvasElement.width;
+                pipCanvas.height = canvasElement.height;
+                pipStatusBox = pipWindow.document.getElementById('pipStatus');
+            }, 100);
+
+            const checkClosed = setInterval(() => {
+                if (pipWindow.closed) {
+                    clearInterval(checkClosed);
+                    pipWindow = null;
+                    pipCanvas = null;
+                    pipCtx = null;
+                    pipStatusBox = null;
+                    pipBtn.innerHTML = `
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="3" width="20" height="14" rx="2"/>
+                            <rect x="12" y="10" width="8" height="6" rx="1"/>
+                        </svg>
+                        미니 창으로 보기
+                    `;
+                    pipBtn.disabled = false;
+                }
+            }, 500);
+
+            pipBtn.textContent = '미니 창 열림';
+            pipBtn.disabled = true;
+        }
+
+        function updatePipCanvas(status) {
+            if (pipWindow && pipCtx && pipCanvas) {
+                try {
+                    pipCtx.drawImage(canvasElement, 0, 0, pipCanvas.width, pipCanvas.height);
+
+                    if (pipStatusBox) {
+                        pipStatusBox.className = 'pip-status';
+                        if (status === 'good') {
+                            pipStatusBox.classList.add('good');
+                            pipStatusBox.textContent = '정상';
+                        } else if (status === 'warning' || status === 'bad') {
+                            pipStatusBox.classList.add('bad');
+                            pipStatusBox.textContent = '비정상';
+                        } else {
+                            pipStatusBox.classList.add('waiting');
+                            pipStatusBox.textContent = '분석 중...';
+                        }
+                    }
+                } catch (e) {
+                    // PIP 창이 닫혔을 수 있음
+                }
+            }
+        }
+
+        startCameraBtn.addEventListener('click', startCamera);
+        stopCameraBtn.addEventListener('click', stopCamera);
+        pipBtn.addEventListener('click', openPipWindow);
+
+        window.addEventListener('beforeunload', stopCamera);
     </script>
 </body>
 </html>

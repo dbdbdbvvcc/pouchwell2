@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>거북목 자가진단 테스트 | 파우치웰</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #0066FF;
+            --primary-dark: #0052CC;
+            --primary-light: #E6F0FF;
+            --accent-blue: #00D4FF;
+            --navy: #0A1628;
+            --navy-light: #1A2B4A;
+            --white: #FFFFFF;
+            --off-white: #F8FAFC;
+            --gray-50: #F1F5F9;
+            --gray-100: #E2E8F0;
+            --gray-200: #CBD5E1;
+            --gray-400: #94A3B8;
+            --gray-600: #475569;
+            --gray-800: #1E293B;
+            --gradient-primary: linear-gradient(135deg, #0066FF 0%, #00D4FF 100%);
+            --gradient-light: linear-gradient(180deg, #F8FAFC 0%, #E6F0FF 100%);
+            --shadow-sm: 0 2px 8px rgba(0, 102, 255, 0.08);
+            --shadow-md: 0 8px 30px rgba(0, 102, 255, 0.12);
+            --shadow-lg: 0 20px 60px rgba(0, 102, 255, 0.15);
+            --green: #10B981;
+            --yellow: #F59E0B;
+            --red: #EF4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--gradient-light);
+            color: var(--gray-800);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--navy);
+            text-decoration: none;
+            margin-bottom: 30px;
+            display: inline-block;
+        }
+
+        .logo span {
+            color: var(--primary-blue);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: var(--gray-600);
+            font-size: 1rem;
+        }
+
+        /* Test Card */
+        .test-card {
+            background: var(--white);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .test-intro {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .test-intro .icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .test-intro h2 {
+            font-size: 1.3rem;
+            color: var(--navy);
+            margin-bottom: 10px;
+        }
+
+        .test-intro p {
+            color: var(--gray-600);
+            font-size: 14px;
+        }
+
+        /* Checklist */
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist li {
+            margin-bottom: 16px;
+        }
+
+        .checklist label {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            padding: 18px 20px;
+            background: var(--off-white);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .checklist label:hover {
+            background: var(--primary-light);
+        }
+
+        .checklist input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            margin-top: 2px;
+            accent-color: var(--primary-blue);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .checklist input[type="checkbox"]:checked + .check-text {
+            color: var(--primary-blue);
+        }
+
+        .checklist label:has(input:checked) {
+            background: var(--primary-light);
+            border-color: var(--primary-blue);
+        }
+
+        .check-text {
+            font-size: 15px;
+            color: var(--gray-800);
+            line-height: 1.6;
+        }
+
+        .check-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: var(--gray-200);
+            color: var(--gray-600);
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .checklist label:has(input:checked) .check-number {
+            background: var(--primary-blue);
+            color: var(--white);
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: var(--gradient-primary);
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 30px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Result Section */
+        .result-section {
+            display: none;
+        }
+
+        .result-section.active {
+            display: block;
+        }
+
+        .result-card {
+            text-align: center;
+            padding: 50px 30px;
+        }
+
+        .result-icon {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            margin: 0 auto 25px;
+        }
+
+        .result-icon.normal {
+            background: linear-gradient(135deg, #10B981 0%, #34D399 100%);
+        }
+
+        .result-icon.warning {
+            background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
+        }
+
+        .result-icon.danger {
+            background: linear-gradient(135deg, #EF4444 0%, #F87171 100%);
+        }
+
+        .result-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .result-title.normal {
+            color: var(--green);
+        }
+
+        .result-title.warning {
+            color: var(--yellow);
+        }
+
+        .result-title.danger {
+            color: var(--red);
+        }
+
+        .result-count {
+            font-size: 1rem;
+            color: var(--gray-600);
+            margin-bottom: 25px;
+        }
+
+        .result-count strong {
+            color: var(--primary-blue);
+            font-size: 1.2rem;
+        }
+
+        .result-description {
+            background: var(--off-white);
+            padding: 25px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+
+        .result-description p {
+            color: var(--gray-700);
+            font-size: 15px;
+            line-height: 1.8;
+        }
+
+        .result-tips {
+            text-align: left;
+            margin-bottom: 30px;
+        }
+
+        .result-tips h4 {
+            font-size: 1rem;
+            color: var(--navy);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .result-tips ul {
+            list-style: none;
+        }
+
+        .result-tips li {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--gray-100);
+            font-size: 14px;
+            color: var(--gray-600);
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .result-tips li:last-child {
+            border-bottom: none;
+        }
+
+        .result-tips li::before {
+            content: "✓";
+            color: var(--primary-blue);
+            font-weight: bold;
+        }
+
+        /* Back Button */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 32px;
+            background: var(--white);
+            color: var(--gray-800);
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+        }
+
+        .retry-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 32px;
+            background: var(--gradient-primary);
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 15px;
+        }
+
+        .retry-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px 15px;
+            }
+
+            .test-card {
+                padding: 25px 20px;
+            }
+
+            .header h1 {
+                font-size: 1.6rem;
+            }
+
+            .checklist label {
+                padding: 15px;
+            }
+
+            .check-text {
+                font-size: 14px;
+            }
+
+            .result-card {
+                padding: 30px 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .retry-btn, .back-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <a href="index.html" class="logo">Pouch<span>Well</span></a>
+            <h1>거북목 자가진단 테스트</h1>
+            <p>아래 항목 중 해당되는 증상을 체크해주세요</p>
+        </div>
+
+        <!-- Test Card -->
+        <div class="test-card">
+            <!-- Test Form -->
+            <div class="test-form" id="testForm">
+                <div class="test-intro">
+                    <div class="icon">🦴</div>
+                    <h2>나도 거북목일까?</h2>
+                    <p>평소 본인의 상태와 일치하는 항목에 체크해주세요</p>
+                </div>
+
+                <ul class="checklist">
+                    <li>
+                        <label>
+                            <input type="checkbox" name="symptom" value="1">
+                            <span class="check-text">
+                                <span class="check-number">1</span>
+                                목이나 어깨가 자주 뻣뻣하고 뻐근하다
+                            </span>
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="checkbox" name="symptom" value="2">
+                            <span class="check-text">
+                                <span class="check-number">2</span>
+                                두통이 자주 발생한다 (특히 뒷목에서 시작되는 두통)
+                            </span>
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="checkbox" name="symptom" value="3">
+                            <span class="check-text">
+                                <span class="check-number">3</span>
+                                거울로 봤을 때 머리가 어깨보다 앞으로 나와 있다
+                            </span>
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="checkbox" name="symptom" value="4">
+                            <span class="check-text">
+                                <span class="check-number">4</span>
+                                장시간 컴퓨터/스마트폰 사용 후 목 통증이 있다
+                            </span>
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="checkbox" name="symptom" value="5">
+                            <span class="check-text">
+                                <span class="check-number">5</span>
+                                어깨가 앞으로 말려있거나 등이 굽어있다
+                            </span>
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="checkbox" name="symptom" value="6">
+                            <span class="check-text">
+                                <span class="check-number">6</span>
+                                팔이나 손이 자주 저리거나 감각이 둔해진다
+                            </span>
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="checkbox" name="symptom" value="7">
+                            <span class="check-text">
+                                <span class="check-number">7</span>
+                                목을 뒤로 젖히거나 돌릴 때 뻣뻣함이나 통증이 느껴진다
+                            </span>
+                        </label>
+                    </li>
+                </ul>
+
+                <button type="button" class="submit-btn" id="submitBtn">진단 결과 확인하기</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-section" id="resultSection">
+                <div class="result-card">
+                    <div class="result-icon" id="resultIcon">
+                        <span id="resultEmoji"></span>
+                    </div>
+                    <h2 class="result-title" id="resultTitle"></h2>
+                    <p class="result-count">체크한 항목: <strong id="checkedCount">0</strong>개 / 7개</p>
+
+                    <div class="result-description">
+                        <p id="resultDescription"></p>
+                    </div>
+
+                    <div class="result-tips">
+                        <h4>💡 권장 사항</h4>
+                        <ul id="resultTips"></ul>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="retry-btn" id="retryBtn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M1 4v6h6"/>
+                                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+                            </svg>
+                            다시 테스트하기
+                        </button>
+                        <a href="index.html" class="back-btn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 12H5M12 19l-7-7 7-7"/>
+                            </svg>
+                            메인으로 돌아가기
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const submitBtn = document.getElementById('submitBtn');
+        const retryBtn = document.getElementById('retryBtn');
+        const testForm = document.getElementById('testForm');
+        const resultSection = document.getElementById('resultSection');
+        const resultIcon = document.getElementById('resultIcon');
+        const resultEmoji = document.getElementById('resultEmoji');
+        const resultTitle = document.getElementById('resultTitle');
+        const checkedCount = document.getElementById('checkedCount');
+        const resultDescription = document.getElementById('resultDescription');
+        const resultTips = document.getElementById('resultTips');
+
+        submitBtn.addEventListener('click', function() {
+            const checkboxes = document.querySelectorAll('input[name="symptom"]:checked');
+            const count = checkboxes.length;
+
+            checkedCount.textContent = count;
+
+            // Reset classes
+            resultIcon.className = 'result-icon';
+            resultTitle.className = 'result-title';
+
+            let title, emoji, description, tips;
+
+            if (count < 3) {
+                // 정상
+                resultIcon.classList.add('normal');
+                resultTitle.classList.add('normal');
+                emoji = '😊';
+                title = '정상';
+                description = '현재 거북목 증상이 거의 없는 상태입니다. 하지만 장시간 컴퓨터나 스마트폰 사용 시 올바른 자세를 유지하는 것이 중요합니다. 예방이 최선의 치료입니다!';
+                tips = [
+                    '30분마다 스트레칭으로 목과 어깨를 풀어주세요',
+                    '모니터 높이를 눈높이에 맞춰 설정하세요',
+                    '스마트폰 사용 시 눈높이까지 들어 올려 사용하세요',
+                    '꾸준한 운동으로 목과 어깨 근육을 강화하세요'
+                ];
+            } else if (count < 5) {
+                // 거북목 위험
+                resultIcon.classList.add('warning');
+                resultTitle.classList.add('warning');
+                emoji = '⚠️';
+                title = '거북목 위험';
+                description = '거북목 증상이 나타나기 시작한 단계입니다. 지금부터 자세 교정과 스트레칭을 시작하면 충분히 개선할 수 있습니다. 방치하면 증상이 악화될 수 있으니 주의가 필요합니다.';
+                tips = [
+                    '의식적으로 턱을 당기는 습관을 들이세요',
+                    '노트북 사용 시 스탠드를 활용해 화면을 높이세요',
+                    '목 스트레칭을 하루 3회 이상 실시하세요',
+                    '베개 높이를 조절하여 수면 자세를 개선하세요',
+                    '파우치웰 노트북 스탠드로 올바른 자세를 유지하세요'
+                ];
+            } else {
+                // 거북목 매우 위험
+                resultIcon.classList.add('danger');
+                resultTitle.classList.add('danger');
+                emoji = '🚨';
+                title = '거북목 매우 위험';
+                description = '거북목 증상이 상당히 진행된 상태입니다. 만성 목 통증, 두통, 어깨 결림 등이 지속될 수 있으며, 방치 시 디스크 질환으로 이어질 수 있습니다. 전문의 상담을 권장드립니다.';
+                tips = [
+                    '가능한 빨리 정형외과나 재활의학과를 방문하세요',
+                    '장시간 같은 자세 유지를 피하고 자주 움직이세요',
+                    '컴퓨터 작업 환경을 인체공학적으로 개선하세요',
+                    '매일 목과 어깨 스트레칭을 15분 이상 실시하세요',
+                    '수영, 요가 등 전신 운동을 시작해보세요',
+                    '파우치웰 스탠드로 작업 환경을 개선하세요'
+                ];
+            }
+
+            resultEmoji.textContent = emoji;
+            resultTitle.textContent = title;
+            resultDescription.textContent = description;
+
+            resultTips.innerHTML = tips.map(tip => `<li>${tip}</li>`).join('');
+
+            testForm.style.display = 'none';
+            resultSection.classList.add('active');
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        retryBtn.addEventListener('click', function() {
+            // Reset checkboxes
+            document.querySelectorAll('input[name="symptom"]').forEach(cb => cb.checked = false);
+
+            resultSection.classList.remove('active');
+            testForm.style.display = 'block';
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>

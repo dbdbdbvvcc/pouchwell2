@@ -1058,6 +1058,24 @@
             color: var(--white);
         }
 
+        /* Red Screen Overlay for Bad Posture */
+        .red-screen-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(239, 68, 68, 0.15);
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .red-screen-overlay.active {
+            opacity: 1;
+        }
+
         /* Fixed Status Popup */
         .fixed-status-popup {
             position: fixed;
@@ -1482,6 +1500,9 @@
     </style>
 </head>
 <body>
+    <!-- Red Screen Overlay -->
+    <div class="red-screen-overlay" id="redScreenOverlay"></div>
+
     <!-- Fixed Status Popup -->
     <div class="fixed-status-popup" id="fixedStatusPopup">
         <div class="status-label">목 자세</div>
@@ -1511,9 +1532,9 @@
                     <span class="highlight">깊은 가치</span>
                 </h1>
                 <p class="hero-description">
-                    보호, 경추 건강, 정리.<br>
+                    경추 건강, 지구 건강, 경제적 건강.<br>
                     세 가지 가치를 하나의 선택으로 실현하는<br>
-                    친환경 3-in-1 노트북 스탠드 파우치
+                    친환경 2-in-1 노트북 스탠드 파우치
                 </p>
                 <div class="hero-stats">
                     <div class="stat-item">
@@ -1521,12 +1542,12 @@
                         <div class="stat-label">초경량 설계</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-number">3in1</div>
+                        <div class="stat-number">2in1</div>
                         <div class="stat-label">통합 솔루션</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-number">친환경<span></span></div>
-                        <div class="stat-label">신소재</div>
+                        <div class="stat-number">100<span>%</span></div>
+                        <div class="stat-label">친환경 소재</div>
                     </div>
                 </div>
                 <div class="hero-buttons">
@@ -1657,7 +1678,7 @@
                     <span class="section-tag">THE SOLUTION</span>
                     <h3>파우치웰의 해답</h3>
                     <p>
-                        친환경 소재로 정교하게 설계된 250g 초경량 3-in-1 솔루션.
+                        친환경 소재로 정교하게 설계된 250g 초경량 2-in-1 솔루션.
                         파우치와 노트북 스탠드를 하나로 통합하여, 공간과 자원의 효율을
                         극대화했습니다.
                     </p>
@@ -1665,7 +1686,7 @@
                     <ul class="feature-list">
                         <li><span class="check-icon">✓</span> 250g 초경량 — 언제 어디서나 휴대 가능</li>
                         <li><span class="check-icon">✓</span> 친환경 재생 소재 — 지구를 생각하는 소재 선택</li>
-                        <li><span class="check-icon">✓</span> 3-in-1 통합 설계 — 파우치 + 스탠드 기능</li>
+                        <li><span class="check-icon">✓</span> 2-in-1 통합 설계 — 파우치 + 스탠드 기능</li>
                         <li><span class="check-icon">✓</span> 인체공학적 각도 — 경추 부담 최소화</li>
                         <li><span class="check-icon">✓</span> 합리적 가격대 — 누구나 접근 가능한 웰니스</li>
                     </ul>
@@ -1683,7 +1704,7 @@
         <div class="container">
             <div class="section-header">
                 <span class="section-tag">POSTURE CHECK</span>
-                <h2 class="section-title">실시간 거북목 체크</h2>
+                <h2 class="section-title">실시간 목 자세 체크</h2>
                 <p class="section-subtitle">카메라로 현재 목 상태를 확인하고 거북목을 예방하세요</p>
             </div>
 
@@ -1736,21 +1757,21 @@
                     </div>
 
                     <div class="status-card">
-                        <h4>목 기울기 각도</h4>
+                        <h4>목 자세 점수</h4>
                         <div class="angle-display">
                             <div class="angle-value" id="angleValue">--°</div>
-                            <p class="angle-label">머리 전방 기울기 (0°가 이상적)</p>
+                            <p class="angle-label">거북목 지표 (0°가 이상적, 25° 이상 위험)</p>
                         </div>
                     </div>
 
                     <div class="tips-card">
-                        <h4>올바른 자세 TIP</h4>
+                        <h4>올바른 자세 TIP (정면 카메라)</h4>
                         <ul>
-                            <li>모니터 상단을 눈높이에 맞추거나 15° 아래로</li>
-                            <li>턱-목 각도 105°~120° 유지하기</li>
-                            <li>귀가 어깨선보다 5cm 이상 앞으로 나오면 거북목!</li>
-                            <li>고개 45° 숙이면 목에 24kg 부담</li>
-                            <li>목 꺾기 대신 부드럽게 도리도리 운동</li>
+                            <li>카메라를 정면에서 얼굴과 어깨가 모두 보이게 설치</li>
+                            <li>고개를 숙이지 말고 모니터를 눈높이에 맞추기</li>
+                            <li>턱을 당기고 머리를 세우기 - 귀가 어깨보다 위에</li>
+                            <li>고개 숙이면 목에 최대 24kg 부담 발생</li>
+                            <li>30분마다 목 스트레칭 - 좌우로 천천히 돌리기</li>
                         </ul>
                     </div>
                 </div>
@@ -1901,6 +1922,7 @@
         const angleValue = document.getElementById('angleValue');
         const fixedStatusPopup = document.getElementById('fixedStatusPopup');
         const fixedStatusValue = document.getElementById('fixedStatusValue');
+        const redScreenOverlay = document.getElementById('redScreenOverlay');
 
         let camera = null;
         let pose = null;
@@ -1937,24 +1959,28 @@
                 statusTitle.textContent = '좋은 자세';
                 statusMessage.textContent = '턱-목 각도가 적절합니다. 이 자세를 유지하세요!';
                 updateFixedPopup('good');
+                redScreenOverlay.classList.remove('active');
             } else if (status === 'warning') {
                 statusIndicator.classList.add('warning');
                 statusIcon.textContent = '⚠';
                 statusTitle.textContent = '주의 필요';
                 statusMessage.textContent = '머리가 약간 앞으로 나왔습니다. 턱을 당겨주세요.';
                 updateFixedPopup('bad');
+                redScreenOverlay.classList.add('active');
             } else if (status === 'bad') {
                 statusIndicator.classList.add('bad');
                 statusIcon.textContent = '✕';
                 statusTitle.textContent = '거북목 자세';
                 statusMessage.textContent = '목에 약 24kg의 부담! 귀를 어깨선에 맞춰주세요.';
                 updateFixedPopup('bad');
+                redScreenOverlay.classList.add('active');
             } else {
                 statusIndicator.classList.add('inactive');
                 statusIcon.textContent = '⏸';
                 statusTitle.textContent = '대기 중';
                 statusMessage.textContent = '카메라를 시작하면 자세 분석이 시작됩니다';
                 updateFixedPopup(null);
+                redScreenOverlay.classList.remove('active');
             }
 
             if (angle !== null && angle !== undefined) {
@@ -1967,26 +1993,56 @@
         }
 
         function calculateNeckAngle(landmarks) {
-            const leftShoulder = landmarks[11];
-            const rightShoulder = landmarks[12];
-            const leftEar = landmarks[7];
-            const rightEar = landmarks[8];
+            // 정면 촬영 기반 거북목 판단 로직
+            const nose = landmarks[0];           // 코
+            const leftShoulder = landmarks[11];  // 왼쪽 어깨
+            const rightShoulder = landmarks[12]; // 오른쪽 어깨
+            const leftEar = landmarks[7];        // 왼쪽 귀
+            const rightEar = landmarks[8];       // 오른쪽 귀
 
+            // 어깨 중심점 계산
             const shoulderCenter = {
                 x: (leftShoulder.x + rightShoulder.x) / 2,
                 y: (leftShoulder.y + rightShoulder.y) / 2
             };
 
+            // 귀 중심점 계산
             const earCenter = {
                 x: (leftEar.x + rightEar.x) / 2,
                 y: (leftEar.y + rightEar.y) / 2
             };
 
-            const deltaX = earCenter.x - shoulderCenter.x;
-            const deltaY = shoulderCenter.y - earCenter.y;
+            // 정면 촬영 시 거북목 지표:
+            // 1. 코와 어깨 중심 사이의 수직 거리 (Y축 차이)
+            // 2. 귀와 어깨 중심 사이의 수직 거리 (Y축 차이)
 
-            const angleRad = Math.atan2(deltaX, deltaY);
-            const angleDeg = Math.abs(angleRad * (180 / Math.PI));
+            // 정상 자세: 코와 귀가 어깨보다 충분히 위에 있음
+            // 거북목 자세: 머리가 앞으로 숙여지면서 코와 귀가 어깨에 가까워짐
+
+            const noseToShoulderY = shoulderCenter.y - nose.y;        // 코-어깨 수직 거리
+            const earToShoulderY = shoulderCenter.y - earCenter.y;    // 귀-어깨 수직 거리
+
+            // 어깨 너비 (정규화를 위한 기준값)
+            const shoulderWidth = Math.abs(rightShoulder.x - leftShoulder.x);
+
+            // 수직 거리 비율 계산 (어깨 너비 대비)
+            // 정상: 0.8 이상, 주의: 0.5~0.8, 위험: 0.5 이하
+            const neckPostureRatio = earToShoulderY / shoulderWidth;
+
+            // 각도로 변환 (0~45도 범위로 매핑)
+            // neckPostureRatio가 클수록 좋은 자세 → 각도는 작게
+            // neckPostureRatio가 작을수록 나쁜 자세 → 각도는 크게
+            let angleDeg;
+            if (neckPostureRatio >= 0.8) {
+                angleDeg = 0 + (0.8 - neckPostureRatio) * 50;  // 0~10도
+            } else if (neckPostureRatio >= 0.5) {
+                angleDeg = 10 + (0.8 - neckPostureRatio) * 50; // 10~25도
+            } else {
+                angleDeg = 25 + (0.5 - neckPostureRatio) * 40; // 25도 이상
+            }
+
+            // 음수 방지 및 범위 제한
+            angleDeg = Math.max(0, Math.min(45, angleDeg));
 
             return angleDeg;
         }
@@ -2060,7 +2116,7 @@
 
                 canvasCtx.font = 'bold 18px "Noto Sans KR"';
                 canvasCtx.fillStyle = status === 'good' ? '#10B981' : status === 'warning' ? '#F59E0B' : '#EF4444';
-                canvasCtx.fillText(`전방 기울기: ${Math.round(neckAngle)}° (${statusText})`, 15, 30);
+                canvasCtx.fillText(`거북목 지표: ${Math.round(neckAngle)}° (${statusText})`, 15, 30);
 
             } else {
                 canvasCtx.font = '16px "Noto Sans KR"';
@@ -2163,6 +2219,7 @@
             `;
 
             updateStatus('inactive', null);
+            redScreenOverlay.classList.remove('active');
             canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
         }
 

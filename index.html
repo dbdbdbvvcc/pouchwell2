@@ -1932,6 +1932,73 @@
         let pipCtx = null;
         let pipStatusBox = null;
 
+        // 경고 소리 추가
+        let warningAudio = null;
+        let badPostureStartTime = null; // 비정상 자세 시작 시간
+        let hasWarned = false; // 경고를 이미 보냈는지 여부
+        const BAD_POSTURE_THRESHOLD = 10000; // 10초 (밀리초)
+
+        // 경고음 초기화 함수
+        function initWarningSound() {
+            if (!warningAudio) {
+                // Web Audio API로 경고음 생성
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+                // 경고음 재생 함수
+                warningAudio = function() {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    // 비프음 설정 (주파수: 800Hz)
+                    oscillator.frequency.value = 800;
+                    oscillator.type = 'sine';
+
+                    // 볼륨 설정 및 페이드아웃
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+                    // 0.3초 동안 재생
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                };
+            }
+        }
+
+        // 경고음 재생 함수
+        function playWarningSound() {
+            if (warningAudio) {
+                warningAudio();
+            }
+        }
+
+        // 비정상 자세 시간 체크 함수
+        function checkBadPostureDuration(status) {
+            const currentTime = Date.now();
+
+            if (status === 'warning' || status === 'bad') {
+                // 비정상 자세 시작
+                if (badPostureStartTime === null) {
+                    badPostureStartTime = currentTime;
+                    hasWarned = false;
+                }
+
+                // 10초 경과 체크
+                const duration = currentTime - badPostureStartTime;
+                if (duration >= BAD_POSTURE_THRESHOLD && !hasWarned) {
+                    // 10초 이상 비정상 자세 유지 시 경고
+                    playWarningSound();
+                    hasWarned = true;
+                }
+            } else if (status === 'good') {
+                // 정상 자세로 돌아오면 리셋
+                badPostureStartTime = null;
+                hasWarned = false;
+            }
+        }
+
         function updateFixedPopup(status) {
             if (!isRunning) {
                 fixedStatusPopup.classList.remove('active', 'good', 'bad');
@@ -1952,6 +2019,9 @@
 
         function updateStatus(status, angle) {
             statusIndicator.className = 'status-indicator';
+
+            // 비정상 자세 시간 체크 (10초 유지 시 경고)
+            checkBadPostureDuration(status);
 
             if (status === 'good') {
                 statusIndicator.classList.add('good');
@@ -2128,6 +2198,9 @@
         }
 
         async function startCamera() {
+            // 경고음 초기화
+            initWarningSound();
+
             startCameraBtn.disabled = true;
             startCameraBtn.innerHTML = `
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin">
@@ -2195,6 +2268,10 @@
 
         function stopCamera() {
             isRunning = false;
+
+            // 타이머 리셋
+            badPostureStartTime = null;
+            hasWarned = false;
 
             if (pipWindow && !pipWindow.closed) {
                 pipWindow.close();
